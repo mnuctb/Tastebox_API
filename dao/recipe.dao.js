@@ -1,11 +1,11 @@
 const db = require("../services/mysql.service");
 const { RECIPE_STATUS } = require("../utils/constants");
 
-const RECIPE_QUERY = `SELECT r.id, r.name, r.description, r.instructions, r.difficulty,
-    r.prep_time_minutes AS prepTimeMinutes, r.is_premium AS isPremium, r.status, r.created_at AS createdAt,
-    ct.id AS cuisineTypeId, ct.name AS cuisineType
-    FROM recipes r
-    JOIN cuisine_types ct ON ct.id = r.cuisine_type_id`;
+const RECIPE_QUERY = `SELECT recipe.id, recipe.name, recipe.description, recipe.instructions, recipe.difficulty,
+    recipe.prep_time_minutes AS prepTimeMinutes, recipe.is_premium AS isPremium, recipe.status, recipe.created_at AS createdAt,
+    cuisine_type.id AS cuisineTypeId, cuisine_type.name AS cuisineType
+    FROM recipe
+    JOIN cuisine_type ON cuisine_type.id = recipe.cuisine_type_id`;
 
 const getRecipeValues = (recipe) => [
     recipe.cuisineTypeId,
@@ -21,29 +21,29 @@ const getRecipeValues = (recipe) => [
 const getAll = async ({ status = null, cuisineTypeId = null, difficulty = null, maxPrepTime = null }) => {
     const [rows] = await db.query(
         `${RECIPE_QUERY}
-        WHERE (? IS NULL OR r.status = ?)
-        AND (? IS NULL OR r.cuisine_type_id = ?)
-        AND (? IS NULL OR r.difficulty = ?)
-        AND (? IS NULL OR r.prep_time_minutes <= ?)
-        ORDER BY r.name`,
+        WHERE (? IS NULL OR recipe.status = ?)
+        AND (? IS NULL OR recipe.cuisine_type_id = ?)
+        AND (? IS NULL OR recipe.difficulty = ?)
+        AND (? IS NULL OR recipe.prep_time_minutes <= ?)
+        ORDER BY recipe.name`,
         [status, status, cuisineTypeId, cuisineTypeId, difficulty, difficulty, maxPrepTime, maxPrepTime]
     );
     return rows;
 };
 
 const getById = async (id) => {
-    const [rows] = await db.query(`${RECIPE_QUERY} WHERE r.id = ?`, [id]);
+    const [rows] = await db.query(`${RECIPE_QUERY} WHERE recipe.id = ?`, [id]);
     return rows[0];
 };
 
 const getPublishedById = async (id) => {
-    const [rows] = await db.query(`${RECIPE_QUERY} WHERE r.id = ? AND r.status = ?`, [id, RECIPE_STATUS.published]);
+    const [rows] = await db.query(`${RECIPE_QUERY} WHERE recipe.id = ? AND recipe.status = ?`, [id, RECIPE_STATUS.published]);
     return rows[0];
 };
 
 const create = async (recipe) => {
     const [result] = await db.query(
-        `INSERT INTO recipes (cuisine_type_id, name, description, instructions, difficulty, prep_time_minutes, is_premium, status)
+        `INSERT INTO recipe (cuisine_type_id, name, description, instructions, difficulty, prep_time_minutes, is_premium, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         getRecipeValues(recipe)
     );
@@ -52,7 +52,7 @@ const create = async (recipe) => {
 
 const update = async (id, recipe) => {
     await db.query(
-        `UPDATE recipes SET cuisine_type_id = ?, name = ?, description = ?, instructions = ?, difficulty = ?,
+        `UPDATE recipe SET cuisine_type_id = ?, name = ?, description = ?, instructions = ?, difficulty = ?,
         prep_time_minutes = ?, is_premium = ?, status = ?
         WHERE id = ?`,
         [...getRecipeValues(recipe), id]
@@ -60,16 +60,16 @@ const update = async (id, recipe) => {
 };
 
 const remove = async (id) => {
-    await db.query("DELETE FROM recipes WHERE id = ?", [id]);
+    await db.query("DELETE FROM recipe WHERE id = ?", [id]);
 };
 
 const getIngredients = async (recipeId) => {
     const [rows] = await db.query(
-        `SELECT i.id, i.name, ri.quantity, ri.unit
-        FROM recipe_ingredients ri
-        JOIN ingredients i ON i.id = ri.ingredient_id
-        WHERE ri.recipe_id = ?
-        ORDER BY i.name`,
+        `SELECT ingredient.id, ingredient.name, recipe_ingredient.quantity, recipe_ingredient.unit
+        FROM recipe_ingredient
+        JOIN ingredient ON ingredient.id = recipe_ingredient.ingredient_id
+        WHERE recipe_ingredient.recipe_id = ?
+        ORDER BY ingredient.name`,
         [recipeId]
     );
     return rows;
@@ -77,15 +77,16 @@ const getIngredients = async (recipeId) => {
 
 const saveIngredient = async (recipeId, ingredientId, { quantity, unit }) => {
     await db.query(
-        `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)
+        `INSERT INTO recipe_ingredient (recipe_id, ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), unit = VALUES(unit)`,
         [recipeId, ingredientId, quantity ?? null, unit ?? null]
     );
 };
 
 const removeIngredient = async (recipeId, ingredientId) => {
-    const [result] = await db.query("DELETE FROM recipe_ingredients WHERE recipe_id = ? AND ingredient_id = ?", [recipeId, ingredientId]);
+    const [result] = await db.query("DELETE FROM recipe_ingredient WHERE recipe_id = ? AND ingredient_id = ?", [recipeId, ingredientId]);
     return result.affectedRows > 0;
 };
 
 module.exports = { getAll, getById, getPublishedById, create, update, remove, getIngredients, saveIngredient, removeIngredient };
+

@@ -3,7 +3,11 @@ const { USER_STATUS } = require("../utils/constants");
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-const PASSWORD_ERROR = "password debe tener mínimo 8 caracteres, una mayúscula y un número";
+const PASSWORD_MAX_BYTES = 72;
+const PASSWORD_ERROR = "password debe tener mínimo 8 caracteres, una mayúscula y un número, y máximo 72 bytes";
+
+const isValidPassword = (password) =>
+    PASSWORD_PATTERN.test(String(password)) && Buffer.byteLength(String(password)) <= PASSWORD_MAX_BYTES;
 
 const validateRegister = (req, res, next) => {
     const { firstName, lastName, email, password } = req.body ?? {};
@@ -11,7 +15,7 @@ const validateRegister = (req, res, next) => {
     if (!isText(firstName)) errors.push("firstName es obligatorio");
     if (!isText(lastName)) errors.push("lastName es obligatorio");
     if (!EMAIL_PATTERN.test(String(email))) errors.push("email no es válido");
-    if (!PASSWORD_PATTERN.test(String(password))) errors.push(PASSWORD_ERROR);
+    if (!isValidPassword(password)) errors.push(PASSWORD_ERROR);
     sendErrors(errors, res, next);
 };
 
@@ -22,7 +26,7 @@ const validateUpdate = (req, res, next) => {
     if (!isOptional(firstName) && !isText(firstName)) errors.push("firstName no puede estar vacío");
     if (!isOptional(lastName) && !isText(lastName)) errors.push("lastName no puede estar vacío");
     if (!isOptional(email) && !EMAIL_PATTERN.test(String(email))) errors.push("email no es válido");
-    if (!isOptional(password) && !PASSWORD_PATTERN.test(String(password))) errors.push(PASSWORD_ERROR);
+    if (!isOptional(password) && !isValidPassword(password)) errors.push(PASSWORD_ERROR);
     sendErrors(errors, res, next);
 };
 

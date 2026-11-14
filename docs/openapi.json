@@ -3,7 +3,7 @@
   "info": {
     "title": "TasteBox API",
     "version": "1.0.0",
-    "description": "API del proyecto TasteBox. Las rutas con candado necesitan el id del usuario en el encabezado X-User-Id."
+    "description": "API del proyecto TasteBox. Las rutas con candado necesitan el id del usuario en el encabezado X-User-Id. Las contraseñas se almacenan con hash bcrypt (factor de costo 12, salt aleatorio por usuario) y nunca se devuelven en las respuestas."
   },
   "servers": [
     {
@@ -164,7 +164,7 @@
                   "error": "Datos inválidos",
                   "details": [
                     "email no es válido",
-                    "password debe tener mínimo 8 caracteres, una mayúscula y un número"
+                    "password debe tener mínimo 8 caracteres, una mayúscula y un número, y máximo 72 bytes"
                   ]
                 }
               }
@@ -2768,7 +2768,10 @@
             "format": "email"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 72,
+            "description": "Mínimo 8 caracteres, una mayúscula y un número. Máximo 72 bytes, límite de bcrypt. Se hashea en el servidor antes de guardarse."
           }
         }
       },
@@ -2786,7 +2789,10 @@
             "format": "email"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 72,
+            "description": "Mínimo 8 caracteres, una mayúscula y un número. Máximo 72 bytes. Se hashea en el servidor antes de guardarse."
           }
         }
       },

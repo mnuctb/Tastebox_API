@@ -19,14 +19,14 @@ CREATE SCHEMA IF NOT EXISTS `tastebox` DEFAULT CHARACTER SET utf8mb4 COLLATE utf
 USE `tastebox` ;
 
 -- -----------------------------------------------------
--- Table `tastebox`.`users`
+-- Table `tastebox`.`user`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`users` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(45) NOT NULL,
   `last_name` VARCHAR(45) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
   `role` ENUM('user', 'admin') NOT NULL DEFAULT 'user',
   `status` ENUM('active', 'suspended') NOT NULL DEFAULT 'active',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,9 +36,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`plans`
+-- Table `tastebox`.`plan`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`plans` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`plan` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `price` DECIMAL(10,2) NOT NULL,
@@ -50,9 +50,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`cuisine_types`
+-- Table `tastebox`.`cuisine_type`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`cuisine_types` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`cuisine_type` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
@@ -61,9 +61,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`ingredients`
+-- Table `tastebox`.`ingredient`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`ingredients` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`ingredient` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   PRIMARY KEY (`id`),
@@ -72,9 +72,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`tags`
+-- Table `tastebox`.`tag`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`tags` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`tag` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
@@ -83,9 +83,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`recipes`
+-- Table `tastebox`.`recipe`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`recipes` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`recipe` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `cuisine_type_id` INT NOT NULL,
   `name` VARCHAR(100) NOT NULL,
@@ -97,19 +97,19 @@ CREATE TABLE IF NOT EXISTS `tastebox`.`recipes` (
   `status` ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `fk_recipes_cuisine_types_idx` (`cuisine_type_id` ASC) VISIBLE,
-  CONSTRAINT `fk_recipes_cuisine_types`
+  INDEX `fk_recipe_cuisine_type_idx` (`cuisine_type_id` ASC) VISIBLE,
+  CONSTRAINT `fk_recipe_cuisine_type`
     FOREIGN KEY (`cuisine_type_id`)
-    REFERENCES `tastebox`.`cuisine_types` (`id`)
+    REFERENCES `tastebox`.`cuisine_type` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`subscriptions`
+-- Table `tastebox`.`subscription`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`subscriptions` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`subscription` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `plan_id` INT NOT NULL,
@@ -118,25 +118,25 @@ CREATE TABLE IF NOT EXISTS `tastebox`.`subscriptions` (
   `status` ENUM('active', 'expired', 'cancelled') NOT NULL DEFAULT 'active',
   `auto_renew` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  INDEX `fk_subscriptions_users_idx` (`user_id` ASC) VISIBLE,
-  INDEX `fk_subscriptions_plans_idx` (`plan_id` ASC) VISIBLE,
-  CONSTRAINT `fk_subscriptions_users`
+  INDEX `fk_subscription_user_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_subscription_plan_idx` (`plan_id` ASC) VISIBLE,
+  CONSTRAINT `fk_subscription_user`
     FOREIGN KEY (`user_id`)
-    REFERENCES `tastebox`.`users` (`id`)
+    REFERENCES `tastebox`.`user` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_subscriptions_plans`
+  CONSTRAINT `fk_subscription_plan`
     FOREIGN KEY (`plan_id`)
-    REFERENCES `tastebox`.`plans` (`id`)
+    REFERENCES `tastebox`.`plan` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`reviews`
+-- Table `tastebox`.`review`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`reviews` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`review` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `recipe_id` INT NOT NULL,
@@ -145,16 +145,16 @@ CREATE TABLE IF NOT EXISTS `tastebox`.`reviews` (
   `would_cook_again` TINYINT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uq_reviews_user_recipe` (`user_id` ASC, `recipe_id` ASC) VISIBLE,
-  INDEX `fk_reviews_recipes_idx` (`recipe_id` ASC) VISIBLE,
-  CONSTRAINT `fk_reviews_users`
+  UNIQUE INDEX `uq_review_user_recipe` (`user_id` ASC, `recipe_id` ASC) VISIBLE,
+  INDEX `fk_review_recipe_idx` (`recipe_id` ASC) VISIBLE,
+  CONSTRAINT `fk_review_user`
     FOREIGN KEY (`user_id`)
-    REFERENCES `tastebox`.`users` (`id`)
+    REFERENCES `tastebox`.`user` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_reviews_recipes`
+  CONSTRAINT `fk_review_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -169,49 +169,49 @@ CREATE TABLE IF NOT EXISTS `tastebox`.`cooking_activity` (
   `recipe_id` INT NOT NULL,
   `cooked_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `fk_cooking_activity_users_idx` (`user_id` ASC) VISIBLE,
-  INDEX `fk_cooking_activity_recipes_idx` (`recipe_id` ASC) VISIBLE,
-  CONSTRAINT `fk_cooking_activity_users`
+  INDEX `fk_cooking_activity_user_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_cooking_activity_recipe_idx` (`recipe_id` ASC) VISIBLE,
+  CONSTRAINT `fk_cooking_activity_user`
     FOREIGN KEY (`user_id`)
-    REFERENCES `tastebox`.`users` (`id`)
+    REFERENCES `tastebox`.`user` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_cooking_activity_recipes`
+  CONSTRAINT `fk_cooking_activity_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`recipe_views`
+-- Table `tastebox`.`recipe_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`recipe_views` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`recipe_view` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `recipe_id` INT NOT NULL,
   `viewed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `fk_recipe_views_users_idx` (`user_id` ASC) VISIBLE,
-  INDEX `fk_recipe_views_recipes_idx` (`recipe_id` ASC) VISIBLE,
-  CONSTRAINT `fk_recipe_views_users`
+  INDEX `fk_recipe_view_user_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_recipe_view_recipe_idx` (`recipe_id` ASC) VISIBLE,
+  CONSTRAINT `fk_recipe_view_user`
     FOREIGN KEY (`user_id`)
-    REFERENCES `tastebox`.`users` (`id`)
+    REFERENCES `tastebox`.`user` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_recipe_views_recipes`
+  CONSTRAINT `fk_recipe_view_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`weekly_boxes`
+-- Table `tastebox`.`weekly_box`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`weekly_boxes` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`weekly_box` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `recipe_id` INT NOT NULL,
   `name` VARCHAR(100) NOT NULL,
@@ -219,84 +219,84 @@ CREATE TABLE IF NOT EXISTS `tastebox`.`weekly_boxes` (
   `week_start_date` DATE NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `week_start_date_UNIQUE` (`week_start_date` ASC) VISIBLE,
-  INDEX `fk_weekly_boxes_recipes_idx` (`recipe_id` ASC) VISIBLE,
-  CONSTRAINT `fk_weekly_boxes_recipes`
+  INDEX `fk_weekly_box_recipe_idx` (`recipe_id` ASC) VISIBLE,
+  CONSTRAINT `fk_weekly_box_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`recipe_ingredients`
+-- Table `tastebox`.`recipe_ingredient`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`recipe_ingredients` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`recipe_ingredient` (
   `recipe_id` INT NOT NULL,
   `ingredient_id` INT NOT NULL,
   `quantity` DECIMAL(8,2) NULL,
   `unit` VARCHAR(20) NULL,
   PRIMARY KEY (`recipe_id`, `ingredient_id`),
-  INDEX `fk_recipe_ingredients_ingredients_idx` (`ingredient_id` ASC) VISIBLE,
-  CONSTRAINT `fk_recipe_ingredients_recipes`
+  INDEX `fk_recipe_ingredient_ingredient_idx` (`ingredient_id` ASC) VISIBLE,
+  CONSTRAINT `fk_recipe_ingredient_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_recipe_ingredients_ingredients`
+  CONSTRAINT `fk_recipe_ingredient_ingredient`
     FOREIGN KEY (`ingredient_id`)
-    REFERENCES `tastebox`.`ingredients` (`id`)
+    REFERENCES `tastebox`.`ingredient` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`collection_items`
+-- Table `tastebox`.`collection_item`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`collection_items` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`collection_item` (
   `user_id` INT NOT NULL,
   `recipe_id` INT NOT NULL,
   `saved_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`, `recipe_id`),
-  INDEX `fk_collection_items_recipes_idx` (`recipe_id` ASC) VISIBLE,
-  CONSTRAINT `fk_collection_items_users`
+  INDEX `fk_collection_item_recipe_idx` (`recipe_id` ASC) VISIBLE,
+  CONSTRAINT `fk_collection_item_user`
     FOREIGN KEY (`user_id`)
-    REFERENCES `tastebox`.`users` (`id`)
+    REFERENCES `tastebox`.`user` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_collection_items_recipes`
+  CONSTRAINT `fk_collection_item_recipe`
     FOREIGN KEY (`recipe_id`)
-    REFERENCES `tastebox`.`recipes` (`id`)
+    REFERENCES `tastebox`.`recipe` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `tastebox`.`review_tags`
+-- Table `tastebox`.`review_tag`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tastebox`.`review_tags` (
+CREATE TABLE IF NOT EXISTS `tastebox`.`review_tag` (
   `review_id` INT NOT NULL,
   `tag_id` INT NOT NULL,
   PRIMARY KEY (`review_id`, `tag_id`),
-  INDEX `fk_review_tags_tags_idx` (`tag_id` ASC) VISIBLE,
-  CONSTRAINT `fk_review_tags_reviews`
+  INDEX `fk_review_tag_tag_idx` (`tag_id` ASC) VISIBLE,
+  CONSTRAINT `fk_review_tag_review`
     FOREIGN KEY (`review_id`)
-    REFERENCES `tastebox`.`reviews` (`id`)
+    REFERENCES `tastebox`.`review` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_review_tags_tags`
+  CONSTRAINT `fk_review_tag_tag`
     FOREIGN KEY (`tag_id`)
-    REFERENCES `tastebox`.`tags` (`id`)
+    REFERENCES `tastebox`.`tag` (`id`)
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
-ALTER TABLE `tastebox`.`reviews` ADD CONSTRAINT `chk_reviews_rating` CHECK (`rating` BETWEEN 1 AND 5);
-ALTER TABLE `tastebox`.`recipes` ADD CONSTRAINT `chk_recipes_prep_time` CHECK (`prep_time_minutes` > 0);
-ALTER TABLE `tastebox`.`plans` ADD CONSTRAINT `chk_plans_price` CHECK (`price` >= 0);
+ALTER TABLE `tastebox`.`review` ADD CONSTRAINT `chk_review_rating` CHECK (`rating` BETWEEN 1 AND 5);
+ALTER TABLE `tastebox`.`recipe` ADD CONSTRAINT `chk_recipe_prep_time` CHECK (`prep_time_minutes` > 0);
+ALTER TABLE `tastebox`.`plan` ADD CONSTRAINT `chk_plan_price` CHECK (`price` >= 0);
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

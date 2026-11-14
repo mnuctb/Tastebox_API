@@ -3,29 +3,29 @@ const { RECIPE_STATUS } = require("../utils/constants");
 
 const getByUser = async (userId) => {
     const [rows] = await db.query(
-        `SELECT r.id, r.name, ct.name AS cuisineType, r.difficulty, r.prep_time_minutes AS prepTimeMinutes,
-        r.is_premium AS isPremium, ci.saved_at AS savedAt
-        FROM collection_items ci
-        JOIN recipes r ON r.id = ci.recipe_id
-        JOIN cuisine_types ct ON ct.id = r.cuisine_type_id
-        WHERE ci.user_id = ? AND r.status = ?
-        ORDER BY ci.saved_at DESC`,
+        `SELECT recipe.id, recipe.name, cuisine_type.name AS cuisineType, recipe.difficulty, recipe.prep_time_minutes AS prepTimeMinutes,
+        recipe.is_premium AS isPremium, collection_item.saved_at AS savedAt
+        FROM collection_item
+        JOIN recipe ON recipe.id = collection_item.recipe_id
+        JOIN cuisine_type ON cuisine_type.id = recipe.cuisine_type_id
+        WHERE collection_item.user_id = ? AND recipe.status = ?
+        ORDER BY collection_item.saved_at DESC`,
         [userId, RECIPE_STATUS.published]
     );
     return rows;
 };
 
 const exists = async (userId, recipeId) => {
-    const [rows] = await db.query("SELECT COUNT(*) AS total FROM collection_items WHERE user_id = ? AND recipe_id = ?", [userId, recipeId]);
+    const [rows] = await db.query("SELECT COUNT(*) AS total FROM collection_item WHERE user_id = ? AND recipe_id = ?", [userId, recipeId]);
     return rows[0].total > 0;
 };
 
 const add = async (userId, recipeId) => {
-    await db.query("INSERT INTO collection_items (user_id, recipe_id) VALUES (?, ?)", [userId, recipeId]);
+    await db.query("INSERT INTO collection_item (user_id, recipe_id) VALUES (?, ?)", [userId, recipeId]);
 };
 
 const remove = async (userId, recipeId) => {
-    const [result] = await db.query("DELETE FROM collection_items WHERE user_id = ? AND recipe_id = ?", [userId, recipeId]);
+    const [result] = await db.query("DELETE FROM collection_item WHERE user_id = ? AND recipe_id = ?", [userId, recipeId]);
     return result.affectedRows > 0;
 };
 

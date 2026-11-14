@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const config = require("./env/config");
 const routes = require("./routes/index.routes");
@@ -7,6 +8,7 @@ const { handleNotFound, handleError } = require("./middlewares/error.middleware"
 
 const api = express();
 
+api.use(cors({ origin: config.corsOrigin, allowedHeaders: ["Content-Type", "X-User-Id"] }));
 api.use(express.json());
 api.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 api.use("/api", routes);
