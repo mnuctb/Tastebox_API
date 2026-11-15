@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TasteBox | Mi actividad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="js/pages/activity.js"></script>
+</head>
+<body>
+    <main class="container">
+        <div class="page-title">
+            <p class="eyebrow">Historial de cocina</p>
+            <h1>Mi actividad</h1>
+            <p class="muted">Las recetas que preparaste en el mes, por tipo de cocina, y tu racha de semanas cocinando.</p>
+        </div>
+        <form class="filters" id="month-form">
+            <div class="form-field month-field">
+                <label for="month">Mes</label>
+                <input id="month" name="month" type="month">
+            </div>
+        </form>
+        <div id="activity-content"></div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TasteBox | Inicio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="js/pages/home.js"></script>
+</head>
+<body>
+    <main>
+        <section class="container hero">
+            <div>
+                <p class="eyebrow">Suscripción gastronómica</p>
+                <h1>Cocina algo increíble esta semana.</h1>
+                <p>Descubre recetas, recibe ingredientes y convierte cada comida en una nueva experiencia.</p>
+                <div class="hero-actions">
+                    <a class="button" href="recipes.html">Explorar recetas</a>
+                    <a class="button secondary" href="login.html" id="hero-session-link">Iniciar sesión</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="img/hero.jpg" alt="Plato de ramen">
+                <span class="hero-badge">Lleva tu racha semanal de cocina</span>
+            </div>
+        </section>
+
+        <section class="container section">
+            <p class="eyebrow">Por qué TasteBox</p>
+            <h2>Todo lo que necesitas para cocinar<br>con confianza.</h2>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <h3>Recetas</h3>
+                    <p>Descubre nuevas preparaciones para cocinar en casa.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Ingredientes</h3>
+                    <p>Revisa los ingredientes y cantidades de cada preparación.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Actividad</h3>
+                    <p>Registra las recetas preparadas y conoce tus hábitos.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Premium</h3>
+                    <p>Obtén beneficios y recomendaciones exclusivas.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="container section">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Catálogo</p>
+                    <h2>Recetas destacadas</h2>
+                </div>
+                <a class="button secondary small" href="recipes.html">Ver todos</a>
+            </div>
+            <div id="featured-recipes" class="recipe-grid"></div>
+        </section>
+
+        <section class="container section" id="plans">
+            <div class="center">
+                <p class="eyebrow">Planes</p>
+                <h2>Elige cómo quieres cocinar</h2>
+                <p class="muted">Empieza gratis o desbloquea todo el catálogo con recomendaciones semanales.</p>
+            </div>
+            <div id="plan-list" class="plan-grid"></div>
+        </section>
+    </main>
+</body>
+</html>
