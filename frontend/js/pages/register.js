@@ -18,6 +18,13 @@ const getFormErrors = () => {
     return errors;
 };
 
+const readNewUser = () => ({
+    firstName: form.firstName.value.trim(),
+    lastName: form.lastName.value.trim(),
+    email: form.email.value.trim(),
+    password: form.password.value
+});
+
 const register = async () => {
     errorBox.textContent = "";
     const formErrors = getFormErrors();
@@ -25,12 +32,7 @@ const register = async () => {
         showFormErrors(formErrors);
         return;
     }
-    const newUser = {
-        firstName: form.firstName.value.trim(),
-        lastName: form.lastName.value.trim(),
-        email: form.email.value.trim(),
-        password: form.password.value
-    };
+    const newUser = readNewUser();
     showLoading("Creando tu cuenta...");
     try {
         await request("/users", { method: "POST", body: newUser });

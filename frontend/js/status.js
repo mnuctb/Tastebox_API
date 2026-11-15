@@ -55,7 +55,7 @@ const openOverlay = (box) => {
     overlay.replaceChildren(box);
 };
 
-export const closeStatus = () => {
+const closeStatus = () => {
     clearTimeout(closeTimer);
     overlay?.remove();
     overlay = null;
@@ -81,7 +81,7 @@ export const showError = (message, onRetry) => {
 
 export const showSuccess = (message, onClose) => {
     const box = createStatusBox("success", "La operación se ejecutó con éxito.");
-    addButton(box, `✓ ${message}`, "light");
+    addButton(box, message, "light");
     openOverlay(box);
     closeTimer = setTimeout(() => {
         closeStatus();

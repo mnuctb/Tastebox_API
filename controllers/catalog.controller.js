@@ -1,4 +1,5 @@
 const catalogDao = require("../dao/catalog.dao");
+const { HTTP_STATUS } = require("../utils/constants");
 
 const getCuisineTypes = async (req, res) => {
     res.json(await catalogDao.getCuisineTypes());
@@ -13,7 +14,7 @@ const getTags = async (req, res) => {
 };
 
 const createIngredient = async (req, res) => {
-    res.status(201).json(await catalogDao.createIngredient(req.body.name));
+    res.status(HTTP_STATUS.created).json(await catalogDao.createIngredient(req.body.name));
 };
 
 module.exports = { getCuisineTypes, getIngredients, getTags, createIngredient };

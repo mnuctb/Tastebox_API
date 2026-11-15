@@ -1,7 +1,7 @@
 const recipeDao = require("../dao/recipe.dao");
 const recipeViewDao = require("../dao/recipeView.dao");
 const getUserPlan = require("../utils/userPlan");
-const { ROLES, RECIPE_STATUS } = require("../utils/constants");
+const { ROLES, RECIPE_STATUS, HTTP_STATUS, ERROR_MESSAGES } = require("../utils/constants");
 
 const getAccessError = async (userId, recipe) => {
     const plan = await getUserPlan(userId);
@@ -30,13 +30,13 @@ const getById = async (req, res) => {
     const recipeId = Number(req.params.recipeId);
     if (req.user.role === ROLES.admin) {
         const recipe = await recipeDao.getById(recipeId);
-        if (!recipe) return res.status(404).json({ error: "Receta no encontrada" });
+        if (!recipe) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
         return sendRecipeWithIngredients(res, recipe);
     }
     const recipe = await recipeDao.getPublishedById(recipeId);
-    if (!recipe) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!recipe) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     const accessError = await getAccessError(req.user.id, recipe);
-    if (accessError) return res.status(403).json({ error: accessError });
+    if (accessError) return res.status(HTTP_STATUS.forbidden).json({ error: accessError });
     await recipeViewDao.create(req.user.id, recipe.id);
     sendRecipeWithIngredients(res, recipe);
 };
@@ -48,29 +48,29 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     const recipeId = Number(req.params.recipeId);
-    if (!await recipeDao.getById(recipeId)) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!await recipeDao.getById(recipeId)) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     await recipeDao.update(recipeId, req.body);
     sendRecipeWithIngredients(res, await recipeDao.getById(recipeId));
 };
 
 const remove = async (req, res) => {
     const recipeId = Number(req.params.recipeId);
-    if (!await recipeDao.getById(recipeId)) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!await recipeDao.getById(recipeId)) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     await recipeDao.remove(recipeId);
-    res.status(204).end();
+    res.status(HTTP_STATUS.noContent).end();
 };
 
 const saveIngredient = async (req, res) => {
     const recipe = await recipeDao.getById(Number(req.params.recipeId));
-    if (!recipe) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!recipe) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     await recipeDao.saveIngredient(recipe.id, Number(req.params.ingredientId), req.body);
     sendRecipeWithIngredients(res, recipe);
 };
 
 const removeIngredient = async (req, res) => {
     const wasRemoved = await recipeDao.removeIngredient(Number(req.params.recipeId), Number(req.params.ingredientId));
-    if (!wasRemoved) return res.status(404).json({ error: "La receta no tiene ese ingrediente" });
-    res.status(204).end();
+    if (!wasRemoved) return res.status(HTTP_STATUS.notFound).json({ error: "La receta no tiene ese ingrediente" });
+    res.status(HTTP_STATUS.noContent).end();
 };
 
 module.exports = { getAll, getById, create, update, remove, saveIngredient, removeIngredient };

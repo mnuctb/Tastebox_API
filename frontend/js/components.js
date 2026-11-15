@@ -21,7 +21,7 @@ export const renderRecipeCard = (recipe, { rating = 0, extraButton = "" } = {}) 
         ${rating > 0 ? `<span class="stars" title="Calificación promedio">${renderStars(rating)}</span>` : ""}
         <div class="recipe-card-overlay">
             <span class="recipe-card-name">${escapeHtml(recipe.name)}</span>
-            <span class="recipe-card-meta">${escapeHtml(recipe.cuisineType)} · ${getDifficultyLabel(recipe.difficulty)} · ${recipe.prepTimeMinutes} min</span>
+            <span class="recipe-card-meta">${escapeHtml(recipe.cuisineType)} - ${getDifficultyLabel(recipe.difficulty)} - ${recipe.prepTimeMinutes} min</span>
             <div class="recipe-card-actions">
                 <a class="button light small" href="recipe.html?id=${recipe.id}">Ver receta</a>
                 ${extraButton}
@@ -32,3 +32,11 @@ export const renderRecipeCard = (recipe, { rating = 0, extraButton = "" } = {}) 
 export const renderRecipeGrid = (container, recipes, ratings = new Map()) => {
     container.innerHTML = recipes.map((recipe) => renderRecipeCard(recipe, { rating: ratings.get(recipe.id) })).join("");
 };
+
+export const renderBadge = (text, variant = "") => `<span class="badge ${variant}">${escapeHtml(text)}</span>`;
+
+export const renderTable = (headers, rows) => `
+    <table class="table">
+        <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
+        <tbody>${rows.join("")}</tbody>
+    </table>`;

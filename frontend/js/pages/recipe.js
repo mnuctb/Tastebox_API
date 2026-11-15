@@ -1,22 +1,16 @@
 import { initLayout } from "../layout.js";
-import { request } from "../api.js";
+import { request, HTTP_STATUS } from "../api.js";
 import { requireUser } from "../session.js";
-import { escapeHtml, getDifficultyLabel, renderStars, formatDate } from "../format.js";
+import { escapeHtml, getDifficultyLabel, renderStars, renderStarIcon, formatDate, formatIngredient } from "../format.js";
 import { getRecipeImage } from "../components.js";
 import { showLoadingIn, showErrorIn, runAction } from "../status.js";
 
-const FORBIDDEN = 403;
 const page = document.querySelector("#recipe-page");
 const user = requireUser();
 const recipeId = Number(new URLSearchParams(location.search).get("id"));
 
 let isSaved = false;
 let selectedRating = 0;
-
-const formatIngredient = (ingredient) => {
-    if (ingredient.quantity === null) return `${ingredient.name}: ${ingredient.unit ?? "al gusto"}`;
-    return `${ingredient.name}: ${Number(ingredient.quantity)} ${ingredient.unit ?? ""}`;
-};
 
 const getSteps = (instructions) => instructions
     .split(/\.\s+/)
@@ -29,11 +23,11 @@ const renderReviews = (reviews) => {
         <li class="review-item">
             <strong>${escapeHtml(review.userName)}</strong>
             <span class="stars">${renderStars(review.rating)}</span>
-            <span class="muted"> · ${formatDate(review.createdAt)}</span>
+            <span class="muted"> - ${formatDate(review.createdAt)}</span>
             ${review.comment ? `<p>${escapeHtml(review.comment)}</p>` : ""}
             <p class="field-hint">
                 ${review.wouldCookAgain === null ? "" : `La volvería a cocinar: ${review.wouldCookAgain ? "sí" : "no"}`}
-                ${review.tags ? ` · Etiquetas: ${escapeHtml(review.tags)}` : ""}
+                ${review.tags ? ` - Etiquetas: ${escapeHtml(review.tags)}` : ""}
             </p>
         </li>`).join("")}</ul>`;
 };
@@ -44,12 +38,31 @@ const renderTags = (tags) => tags.map((tag) => `
 const renderRatingButtons = () => {
     const container = page.querySelector("#rating-input");
     container.innerHTML = [1, 2, 3, 4, 5].map((value) => `
-        <button type="button" data-rating="${value}" aria-label="${value} estrellas">${value <= selectedRating ? "★" : "☆"}</button>`).join("");
+        <button type="button" data-rating="${value}" aria-label="${value} estrellas">${renderStarIcon(value <= selectedRating)}</button>`).join("");
 };
 
 const updateSaveButton = () => {
     page.querySelector("#save-button").textContent = isSaved ? "Quitar de mi colección" : "Guardar en mi colección";
 };
+
+const renderReviewForm = (tags) => `
+    <form class="panel" id="review-form">
+        <h3>¿Qué te pareció?</h3>
+        <p class="field-hint">Solo puedes calificar una receta después de marcarla como preparada.</p>
+        <div class="rating-input" id="rating-input"></div>
+        <p><strong>¿La volverías a cocinar?</strong></p>
+        <div class="choice-group">
+            <label><input type="radio" name="wouldCookAgain" value="true"> Sí</label>
+            <label><input type="radio" name="wouldCookAgain" value="false"> No</label>
+        </div>
+        <p><strong>Etiquetas</strong></p>
+        <div class="choice-group">${renderTags(tags)}</div>
+        <div class="form-field">
+            <label for="comment">Comentario</label>
+            <textarea id="comment" name="comment" maxlength="500"></textarea>
+        </div>
+        <button class="button" type="submit">Enviar calificación</button>
+    </form>`;
 
 const renderRecipe = (recipe, reviews, tags) => {
     page.innerHTML = `
@@ -74,23 +87,7 @@ const renderRecipe = (recipe, reviews, tags) => {
                     <button class="button" type="button" id="save-button"></button>
                     <button class="button secondary" type="button" id="cooked-button">Marcar como preparada</button>
                 </div>
-                <form class="panel" id="review-form">
-                    <h3>¿Qué te pareció?</h3>
-                    <p class="field-hint">Solo puedes calificar una receta después de marcarla como preparada.</p>
-                    <div class="rating-input" id="rating-input"></div>
-                    <p><strong>¿La volverías a cocinar?</strong></p>
-                    <div class="choice-group">
-                        <label><input type="radio" name="wouldCookAgain" value="true"> Sí</label>
-                        <label><input type="radio" name="wouldCookAgain" value="false"> No</label>
-                    </div>
-                    <p><strong>Etiquetas</strong></p>
-                    <div class="choice-group">${renderTags(tags)}</div>
-                    <div class="form-field">
-                        <label for="comment">Comentario</label>
-                        <textarea id="comment" name="comment" maxlength="500"></textarea>
-                    </div>
-                    <button class="button" type="submit">Enviar calificación</button>
-                </form>
+                ${renderReviewForm(tags)}
             </div>
         </section>
         <section class="section">
@@ -163,8 +160,8 @@ const addEvents = () => {
 };
 
 const showRecipeError = (error) => {
-    showErrorIn(page, error.message, error.status === FORBIDDEN ? null : loadRecipe);
-    if (error.status === FORBIDDEN) {
+    showErrorIn(page, error.message, error.status === HTTP_STATUS.forbidden ? null : loadRecipe);
+    if (error.status === HTTP_STATUS.forbidden) {
         page.insertAdjacentHTML("beforeend", "<p class=\"center\"><a class=\"button\" href=\"profile.html#subscription\">Ver planes</a> <a class=\"button secondary\" href=\"recipes.html\">Volver al catálogo</a></p>");
     }
 };

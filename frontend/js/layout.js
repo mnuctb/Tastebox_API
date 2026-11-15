@@ -10,15 +10,30 @@ const NAV_LINKS = [
     { page: "plans", href: "index.html#plans", text: "Planes" }
 ];
 
+const USER_LINKS = [
+    { page: "dashboard", href: "dashboard.html", text: "Mi panel" },
+    { page: "profile", href: "profile.html", text: "Perfil" }
+];
+
+const ADMIN_LINKS = [
+    { page: "admin-recipes", href: "admin-recipes.html", text: "Recetas" },
+    { page: "admin-subscriptions", href: "admin-subscriptions.html", text: "Suscripciones" },
+    { page: "admin-users", href: "admin-users.html", text: "Usuarios" }
+];
+
+const getNavLinks = (user) => {
+    if (isAdmin(user)) return ADMIN_LINKS;
+    if (user) return [...NAV_LINKS, ...USER_LINKS];
+    return NAV_LINKS;
+};
+
 const getHeaderActions = (user) => {
     if (!user) {
         return `
             <a class="link" href="login.html">Iniciar sesión</a>
             <a class="button" href="register.html">Registrarse</a>`;
     }
-    const adminLink = isAdmin(user) ? "<a class=\"link\" href=\"admin-recipes.html\">Panel administrador</a>" : "";
     return `
-        ${adminLink}
         <span class="user-greeting">Hola, ${escapeHtml(user.firstName)}</span>
         <button class="button secondary small" type="button" id="logout-button">Cerrar sesión</button>`;
 };
@@ -28,21 +43,21 @@ export const logout = () => {
     location.href = "index.html";
 };
 
+const getLogoHtml = (user) => {
+    if (isAdmin(user)) return "<a class=\"logo\" href=\"admin-recipes.html\">TasteBox<span class=\"logo-tag\">Panel administrador</span></a>";
+    return "<a class=\"logo\" href=\"index.html\">TasteBox</a>";
+};
+
 const renderHeader = (activePage) => {
     const user = getUser();
-    const links = [...NAV_LINKS];
-    if (user && !isAdmin(user)) {
-        links.push({ page: "dashboard", href: "dashboard.html", text: "Mi panel" });
-        links.push({ page: "profile", href: "profile.html", text: "Perfil" });
-    }
-    const navHtml = links
+    const navHtml = getNavLinks(user)
         .map((link) => `<a href="${link.href}" class="${link.page === activePage ? "active" : ""}">${link.text}</a>`)
         .join("");
     const header = document.createElement("header");
     header.className = "site-header";
     header.innerHTML = `
         <div class="container">
-            <a class="logo" href="index.html">TasteBox</a>
+            ${getLogoHtml(user)}
             <nav class="main-nav">${navHtml}</nav>
             <div class="header-actions">${getHeaderActions(user)}</div>
         </div>`;
@@ -50,7 +65,18 @@ const renderHeader = (activePage) => {
     header.querySelector("#logout-button")?.addEventListener("click", logout);
 };
 
-const renderFooter = async () => {
+const loadFooterCuisines = async (cuisineList) => {
+    try {
+        const cuisineTypes = await request("/cuisine-types");
+        cuisineList.innerHTML = cuisineTypes
+            .map((cuisineType) => `<li><a href="recipes.html?cuisineTypeId=${cuisineType.id}">${escapeHtml(cuisineType.name)}</a></li>`)
+            .join("");
+    } catch {
+        cuisineList.innerHTML = "<li>No disponible</li>";
+    }
+};
+
+const renderFooter = () => {
     const footer = document.createElement("footer");
     footer.className = "site-footer";
     footer.innerHTML = `
@@ -78,14 +104,7 @@ const renderFooter = async () => {
         </div>
         <div class="container footer-bottom"></div>`;
     document.body.append(footer);
-    try {
-        const cuisineTypes = await request("/cuisine-types");
-        footer.querySelector("#footer-cuisines").innerHTML = cuisineTypes
-            .map((cuisineType) => `<li><a href="recipes.html?cuisineTypeId=${cuisineType.id}">${escapeHtml(cuisineType.name)}</a></li>`)
-            .join("");
-    } catch {
-        footer.querySelector("#footer-cuisines").innerHTML = "<li>No disponible</li>";
-    }
+    loadFooterCuisines(footer.querySelector("#footer-cuisines"));
 };
 
 const showDefaultImage = (image) => {

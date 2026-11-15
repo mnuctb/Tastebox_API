@@ -1,6 +1,9 @@
 const db = require("../services/mysql.service");
 
-const SAME_MONTH = "DATE_FORMAT(cooking_activity.cooked_at, '%Y-%m') = ?";
+const USER_MONTH_ACTIVITY = `FROM cooking_activity
+    JOIN recipe ON recipe.id = cooking_activity.recipe_id
+    JOIN cuisine_type ON cuisine_type.id = recipe.cuisine_type_id
+    WHERE cooking_activity.user_id = ? AND DATE_FORMAT(cooking_activity.cooked_at, '%Y-%m') = ?`;
 
 const getById = async (id) => {
     const [rows] = await db.query(
@@ -16,10 +19,7 @@ const getById = async (id) => {
 const getByMonth = async (userId, month) => {
     const [rows] = await db.query(
         `SELECT cooking_activity.id, recipe.id AS recipeId, recipe.name AS recipeName, cuisine_type.name AS cuisineType, cooking_activity.cooked_at AS cookedAt
-        FROM cooking_activity
-        JOIN recipe ON recipe.id = cooking_activity.recipe_id
-        JOIN cuisine_type ON cuisine_type.id = recipe.cuisine_type_id
-        WHERE cooking_activity.user_id = ? AND ${SAME_MONTH}
+        ${USER_MONTH_ACTIVITY}
         ORDER BY cooking_activity.cooked_at DESC`,
         [userId, month]
     );
@@ -29,10 +29,7 @@ const getByMonth = async (userId, month) => {
 const countByCuisine = async (userId, month) => {
     const [rows] = await db.query(
         `SELECT cuisine_type.name AS cuisineType, COUNT(*) AS total
-        FROM cooking_activity
-        JOIN recipe ON recipe.id = cooking_activity.recipe_id
-        JOIN cuisine_type ON cuisine_type.id = recipe.cuisine_type_id
-        WHERE cooking_activity.user_id = ? AND ${SAME_MONTH}
+        ${USER_MONTH_ACTIVITY}
         GROUP BY cuisine_type.name
         ORDER BY total DESC`,
         [userId, month]

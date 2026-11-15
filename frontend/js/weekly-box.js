@@ -29,7 +29,7 @@ export const renderWeeklyBox = async (container, subscription) => {
             <section class="weekly-box">
                 <img src="img/weekly-box.jpg" alt="${escapeHtml(box.name)}">
                 <div>
-                    <p class="eyebrow">Recomendación de la semana · desde el ${formatDate(box.weekStartDate)}</p>
+                    <p class="eyebrow">Recomendación de la semana - desde el ${formatDate(box.weekStartDate)}</p>
                     <h3>${escapeHtml(box.name)}</h3>
                     <p>${escapeHtml(box.description ?? "")}</p>
                     <p class="muted">${escapeHtml(formatIngredientNames(box.ingredients))}</p>

@@ -1,6 +1,7 @@
 const activityDao = require("../dao/activity.dao");
 const recipeDao = require("../dao/recipe.dao");
 const { formatDate, toDate, getCurrentMonth, getWeekStart, getPreviousWeek } = require("../utils/dates");
+const { HTTP_STATUS, ERROR_MESSAGES } = require("../utils/constants");
 
 const getWeeklyStreak = (cookingDates) => {
     const activeWeeks = new Set(cookingDates.map((date) => formatDate(getWeekStart(toDate(date)))));
@@ -16,9 +17,9 @@ const getWeeklyStreak = (cookingDates) => {
 
 const create = async (req, res) => {
     const { recipeId } = req.body;
-    if (!await recipeDao.getPublishedById(recipeId)) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!await recipeDao.getPublishedById(recipeId)) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     const activityId = await activityDao.create(Number(req.params.userId), recipeId);
-    res.status(201).json(await activityDao.getById(activityId));
+    res.status(HTTP_STATUS.created).json(await activityDao.getById(activityId));
 };
 
 const getByMonth = async (req, res) => {

@@ -1,22 +1,12 @@
 import { initLayout } from "../layout.js";
-import { request } from "../api.js";
+import { request, getCurrentSubscription } from "../api.js";
 import { requireUser } from "../session.js";
 import { escapeHtml, formatDate } from "../format.js";
 import { showLoadingIn, showErrorIn } from "../status.js";
 import { renderWeeklyBox } from "../weekly-box.js";
 
-const NOT_FOUND = 404;
 const content = document.querySelector("#dashboard-content");
 const user = requireUser();
-
-const getSubscription = async () => {
-    try {
-        return await request(`/users/${user.id}/subscription`);
-    } catch (error) {
-        if (error.status === NOT_FOUND) return null;
-        throw error;
-    }
-};
 
 const renderDashboard = (subscription, collection, summary) => {
     content.innerHTML = `
@@ -44,7 +34,7 @@ const loadDashboard = async () => {
     showLoadingIn(content, "Cargando tu panel...");
     try {
         const [subscription, collection, summary] = await Promise.all([
-            getSubscription(),
+            getCurrentSubscription(user.id),
             request(`/users/${user.id}/collection`),
             request(`/users/${user.id}/cooking-activity/summary`)
         ]);

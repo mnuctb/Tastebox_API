@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TasteBox | Suscripciones</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="js/pages/admin-subscriptions.js"></script>
+</head>
+<body>
+    <main class="container">
+        <div class="section-header page-title">
+            <div>
+                <h1 class="admin-title">Suscripciones activas</h1>
+                <p class="muted">Supervisa el estado y la vigencia de los planes de cada usuario.</p>
+            </div>
+            <div class="form-field admin-filter">
+                <label for="subscription-status">Estado</label>
+                <select id="subscription-status">
+                    <option value="active">Activas</option>
+                    <option value="expired">Vencidas</option>
+                    <option value="cancelled">Canceladas</option>
+                    <option value="">Todas</option>
+                </select>
+            </div>
+        </div>
+        <p class="field-hint" id="subscription-count"></p>
+        <div class="admin-table" id="subscription-table"></div>
+    </main>
+</body>
+</html>

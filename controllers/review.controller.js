@@ -2,6 +2,7 @@ const reviewDao = require("../dao/review.dao");
 const recipeDao = require("../dao/recipe.dao");
 const activityDao = require("../dao/activity.dao");
 const catalogDao = require("../dao/catalog.dao");
+const { HTTP_STATUS, ERROR_MESSAGES } = require("../utils/constants");
 
 const getReviewError = async (userId, recipeId, tagIds) => {
     if (!await activityDao.hasCooked(userId, recipeId)) return "Solo puede calificar recetas que haya marcado como preparadas";
@@ -12,19 +13,19 @@ const getReviewError = async (userId, recipeId, tagIds) => {
 
 const getByRecipe = async (req, res) => {
     const recipeId = Number(req.params.recipeId);
-    if (!await recipeDao.getPublishedById(recipeId)) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!await recipeDao.getPublishedById(recipeId)) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     res.json(await reviewDao.getByRecipe(recipeId));
 };
 
 const create = async (req, res) => {
     const recipeId = Number(req.params.recipeId);
     const tagIds = [...new Set(req.body.tagIds ?? [])];
-    if (!await recipeDao.getPublishedById(recipeId)) return res.status(404).json({ error: "Receta no encontrada" });
+    if (!await recipeDao.getPublishedById(recipeId)) return res.status(HTTP_STATUS.notFound).json({ error: ERROR_MESSAGES.recipeNotFound });
     const reviewError = await getReviewError(req.user.id, recipeId, tagIds);
-    if (reviewError) return res.status(409).json({ error: reviewError });
+    if (reviewError) return res.status(HTTP_STATUS.conflict).json({ error: reviewError });
     const reviewId = await reviewDao.create(req.user.id, recipeId, req.body);
     if (tagIds.length > 0) await reviewDao.addTags(reviewId, tagIds);
-    res.status(201).json(await reviewDao.getById(reviewId));
+    res.status(HTTP_STATUS.created).json(await reviewDao.getById(reviewId));
 };
 
 module.exports = { getByRecipe, create };

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TasteBox | Catálogo de recetas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="js/pages/admin-recipes.js"></script>
+</head>
+<body>
+    <main class="container">
+        <div class="section-header page-title">
+            <div>
+                <h1 class="admin-title">Catálogo de recetas</h1>
+                <p class="muted">Agrega y mantén actualizado el contenido disponible para los usuarios.</p>
+            </div>
+            <button class="button" type="button" id="add-recipe-button">Agregar receta +</button>
+        </div>
+
+        <section class="panel admin-editor" id="recipe-editor" hidden>
+            <h2 id="editor-title">Agregar receta</h2>
+            <form id="recipe-form" novalidate>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="recipe-name">Nombre</label>
+                        <input id="recipe-name" name="name" type="text" maxlength="100">
+                    </div>
+                    <div class="form-field">
+                        <label for="recipe-cuisine-type">Tipo de cocina</label>
+                        <select id="recipe-cuisine-type" name="cuisineTypeId"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="recipe-difficulty">Dificultad</label>
+                        <select id="recipe-difficulty" name="difficulty"></select>
+                    </div>
+                    <div class="form-field">
+                        <label for="recipe-prep-time">Tiempo de preparación (minutos)</label>
+                        <input id="recipe-prep-time" name="prepTimeMinutes" type="number" min="1">
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="recipe-description">Descripción</label>
+                    <textarea id="recipe-description" name="description"></textarea>
+                </div>
+                <div class="form-field">
+                    <label for="recipe-instructions">Preparación</label>
+                    <textarea id="recipe-instructions" name="instructions"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="recipe-status">Estado</label>
+                        <select id="recipe-status" name="status">
+                            <option value="draft">Borrador</option>
+                            <option value="published">Publicada</option>
+                        </select>
+                    </div>
+                    <label class="checkbox-row admin-checkbox">
+                        <input id="recipe-premium" name="isPremium" type="checkbox">
+                        Exclusiva del plan Premium
+                    </label>
+                </div>
+                <div class="admin-form-actions">
+                    <button class="button" type="submit" id="save-recipe-button">Guardar receta</button>
+                    <button class="button secondary" type="button" id="close-editor-button">Cerrar</button>
+                </div>
+            </form>
+
+            <div class="admin-ingredients" id="ingredient-section" hidden>
+                <h3>Ingredientes</h3>
+                <div id="ingredient-list"></div>
+                <form class="admin-inline-form" id="ingredient-form" novalidate>
+                    <div class="form-field">
+                        <label for="ingredient-select">Ingrediente</label>
+                        <select id="ingredient-select" name="ingredientId"></select>
+                    </div>
+                    <div class="form-field">
+                        <label for="ingredient-quantity">Cantidad</label>
+                        <input id="ingredient-quantity" name="quantity" type="number" min="0" step="any">
+                    </div>
+                    <div class="form-field">
+                        <label for="ingredient-unit">Unidad</label>
+                        <input id="ingredient-unit" name="unit" type="text" maxlength="20" placeholder="g, ml, unidades">
+                    </div>
+                    <button class="button small" type="submit">Agregar a la receta</button>
+                </form>
+                <form class="admin-inline-form compact" id="new-ingredient-form" novalidate>
+                    <div class="form-field">
+                        <label for="new-ingredient-name">¿No está en la lista? Créalo</label>
+                        <input id="new-ingredient-name" name="ingredientName" type="text" maxlength="100" placeholder="Nombre del ingrediente">
+                    </div>
+                    <button class="button secondary small" type="submit">Crear ingrediente</button>
+                </form>
+            </div>
+        </section>
+
+        <p class="field-hint" id="recipe-count"></p>
+        <div class="admin-table" id="recipe-table"></div>
+    </main>
+</body>
+</html>

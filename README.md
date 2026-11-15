@@ -1,8 +1,8 @@
-# TasteBox API
+# TasteBox
 
-API REST de TasteBox hecha con Node.js, Express y MySQL.
+Plataforma web de TasteBox: una API REST hecha con Node.js, Express y MySQL, y una interfaz web en HTML, CSS y JavaScript que la consume.
 
-## Cómo ejecutarla
+## Cómo ejecutar la API
 
 1. Instalar las dependencias con `npm install`.
 2. En MySQL Workbench ejecutar `database/tastebox.sql` y después `database/seed.sql`.
@@ -12,6 +12,28 @@ API REST de TasteBox hecha con Node.js, Express y MySQL.
 Las fechas de `seed.sql` se calculan a partir del día en que se ejecuta. Así las suscripciones premium están vigentes, la caja semanal corresponde a la semana actual y el límite mensual del plan gratuito se puede probar en cualquier mes.
 
 La API queda en `http://localhost:5000/api`.
+
+## Cómo abrir la interfaz web
+
+1. Con la API encendida, abrir el proyecto en Visual Studio Code con la extensión Live Server instalada.
+2. Clic derecho sobre `frontend/index.html` y elegir **Open with Live Server**.
+3. En el navegador, cambiar `127.0.0.1` por `localhost` en la dirección (`http://localhost:5500/frontend/index.html`), porque la API solo acepta peticiones desde el origen definido en `CORS_ORIGIN`. Para no hacerlo cada vez, en la configuración de Live Server se puede poner `localhost` en **Live Server > Settings: Host**.
+
+La interfaz se abre con un servidor local y no directamente desde el archivo, porque usa módulos de JavaScript y el navegador solo los permite cuando la página se sirve por HTTP.
+
+| Pantalla | Archivo | Quién |
+|----------|---------|-------|
+| Inicio | `index.html` | Todos |
+| Inicio de sesión y registro | `login.html`, `register.html` | Todos |
+| Catálogo y detalle de receta | `recipes.html`, `recipe.html` | Todos (el detalle pide sesión) |
+| Panel del usuario | `dashboard.html` | Usuario |
+| Perfil y suscripción | `profile.html` | Usuario |
+| Colección y actividad | `collection.html`, `activity.html` | Usuario |
+| Catálogo de recetas (administración) | `admin-recipes.html` | Administrador |
+| Suscripciones | `admin-subscriptions.html` | Administrador |
+| Usuarios registrados | `admin-users.html` | Administrador |
+
+Al iniciar sesión, el administrador entra directamente al catálogo de administración y el usuario final a su panel.
 
 ## Contraseñas
 
@@ -52,6 +74,7 @@ Las contraseñas de esta tabla son solo para pruebas. En la base de datos se gua
 - `scripts`: migración de contraseñas en texto plano a hash.
 - `database/migrations`: cambios de esquema respecto a versiones anteriores.
 - `docs`: documentación OpenAPI, colección de Postman y diagrama entidad-relación.
+- `frontend`: interfaz web. Cada pantalla es un `.html` con su archivo en `frontend/js/pages`, y las partes comunes (peticiones a la API, sesión, estados de carga, error y confirmación, menú y pie de página) están en `frontend/js`.
 
 ## Endpoints
 

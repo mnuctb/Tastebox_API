@@ -1,3 +1,5 @@
+const { HTTP_STATUS } = require("../utils/constants");
+
 const isPositiveInteger = (value) => Number.isInteger(value) && value > 0;
 
 const isText = (value) => typeof value === "string" && value.trim() !== "";
@@ -5,7 +7,7 @@ const isText = (value) => typeof value === "string" && value.trim() !== "";
 const isOptional = (value) => value === undefined || value === null;
 
 const sendErrors = (errors, res, next) => {
-    if (errors.length > 0) return res.status(400).json({ error: "Datos inválidos", details: errors });
+    if (errors.length > 0) return res.status(HTTP_STATUS.badRequest).json({ error: "Datos inválidos", details: errors });
     next();
 };
 
